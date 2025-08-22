@@ -1,10 +1,8 @@
 import csv
 import requests
-import re
 from datetime import datetime
 from data_loader import load_json
 from sentiment_analyzer import quick_sentiment
-from sentiment import analy
 from bs4 import BeautifulSoup
 from visualizer import plot_pie_chart, plot_sentiment_trend
 
@@ -20,9 +18,11 @@ if __name__ == "__main__":
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, "html.parser")
         
+        # 找到 <div itemprop="articleBody">
         article_body = soup.find("div", itemprop="articleBody")
         
         if article_body:
+            # 找出所有 <p> 和 <h2>
             elements = article_body.find_all(["p", "h2"])
             with open('content.csv', 'w', newline='', encoding='utf-8-sig') as csvfile:
         
@@ -41,8 +41,8 @@ if __name__ == "__main__":
     print("=== QUICK SENTIMENT ANALYSIS ===\n")
     
     data = load_json()
-    
-    with open('report.csv', 'w', newline='', encoding='utf-8-sig') as csvfile:
+
+    with open('llama2_13b_sentiment.csv', 'w', newline='', encoding='utf-8-sig') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(['index', 'comment', 'sentiment scores','date'])
 
@@ -50,18 +50,13 @@ if __name__ == "__main__":
             try:
                 sentiment = quick_sentiment(item['text'],item['postTitle'],all_text)
                 print(f'{idx+1} {sentiment}')
-                #sentiment = re.sub(r'<think>.*?</think>', '', sentiment, flags=re.DOTALL).strip()
                 date = datetime.fromisoformat(item['date'].replace('Z', '+00:00'))
                 writer.writerow([idx + 1, item['text'], sentiment,date])
             except Exception as e:
                 print(f"Error on index {idx}: {e}")
                 continue
+            
 
-    with open('report.csv', 'r', newline='', encoding='utf-8-sig') as csvfile:        
-        reader = csv.reader(csvfile)
-        all_text = ' '.join([' '.join(row) for row in reader])
-        analysis = analy(all_text)
-        print(analysis)
 
     plot_pie_chart()
     plot_sentiment_trend()
