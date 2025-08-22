@@ -63,5 +63,5 @@ if __name__ == "__main__":
         analysis = analy(all_text)
         print(analysis)
 
-    #plot_pie_chart()
-    #plot_sentiment_trend()
+    plot_pie_chart()
+    plot_sentiment_trend()
